@@ -1,6 +1,9 @@
 from BOT_func import *
 from irc import *
 import time
+from random import randrange
+from math import ceil
+
 """
 Programme créé par Lénaïc GAGER
 """
@@ -73,29 +76,44 @@ while True:
                 else:
                     log(id,'COMMANDE INTERDITE: '+ message)
 
-            elif message.find('!roulette') != -1 and id == admin:
+            elif message.find('!log') != -1:
+                if id == admin:
+                    #message de la forme !log/message ici/
+                    mess = message.slit('/')[1]
+                    log(id, mess)
+                else:
+                    log(id, 'COMMANDE INTERDITE ' + message)
+
+
+            elif message.find('!roulette') != -1 and id == admin:     #ENLEVER ADMIN
                 irc.private(id,"Bienvenue à la roulette du ZCasino")
 
                 solde = data[id].score
                 continuer = True
 
                 while continuer == True:
-                    irc.private(id,"\nVous disposez de {0} €".format(solde))
+                    irc.private(id,"Vous disposez de {0} points".format(solde))
                     mise = 0
                     EN_LIGNE = 0
                     while int(mise) <= 0 or int(mise) > int(solde):
                         irc.private(id,"Combien voulez vous miser ? :")
                         time.sleep(3)
-                        mise = irc.recevoir()
+                        mise, ID = irc.recevoir()
+                        while ID != id:
+                            mise,ID = irc.recevoir()
+
                         while not mise.isdigit():
                             irc.private(id,"erreur")
                             irc.private(id,"Combien voulez vous miser ? :")
                             time.sleep(3)
-                            mise = irc.recevoir()
+                            mise, ID = irc.recevoir()
+                            while ID != id:
+                                mise, ID = irc.recevoir()
+
                         if int(mise) <= 0:
-                            irc.private(id,"Vous devez misez quelque chose\n")
+                            irc.private(id,"Vous devez misez quelque chose")
                         elif int(mise) > int(solde):
-                            irc.private(id,"Vous n'avez pas assez\n")
+                            irc.private(id,"Vous n'avez pas assez")
                         EN_LIGNE += 1
                         if EN_LIGNE == 3:
                             break
@@ -107,37 +125,55 @@ while True:
 
                     solde -= float(mise)
 
-                    print("\nChoississez une case entre 0 et 49")
+                    irc.private(id,"Choississez une case entre 0 et 49")
                     pari = -1
+
                     while int(pari) < 0 or int(pari) > 49:
                         irc.private(id,"Sur quel numéro souhaitez vous déposer votre mise ? :")
                         time.sleep(3)
-                        pari = irc.recevoir()
+                        pari, ID = irc.recevoir()
+                        while ID != id:
+                            pari, ID = irc.recevoir()
                         if int(pari) < 0 or int(pari) > 49:
                             irc.private(id,"Choisissez une case entre 0 et 49")
-                    print("Vous avez misé {0}€ sur la case n°{1}".format(mise, pari))
 
-                    print("\nLe croupier lance la bille")
+                    irc.private(id,"Vous avez misé {0} points sur la case n°{1}".format(mise, pari))
+
+                    irc.private(id,"Le croupier lance la bille")
                     bille = randrange(50)
-                    print("La bille est tombée sur le numéro {0}".format(bille))
+                    irc.private(id,"La bille est tombée sur le numéro {0}".format(bille))
+
+                    gain = 0
 
                     if pari == bille:
-                        solde += ceil(float(mise) * 3) + float(mise)
-                        print("Vous avez le bon numéro !")
-                        print("Vous avez maintenant {0}€".format(solde))
+                        gain = ceil(float(mise) * 3) + float(mise)
+                        solde += gain
+                        irc.private(id,"Vous avez le bon numéro !")
+                        irc.private(id,"Vous avez maintenant {0}€".format(solde))
+
                     elif int(bille) % 2 == int(pari) % 2:
-                        solde += float(mise) + (float(mise)) / 2
-                        print("La bille est tombée sur la même couleur que votre numéro")
-                        print("Vous avez maintenant {0}€".format(solde))
+                        gain = float(mise) + (float(mise)) / 2
+                        solde += gain
+                        irc.private(id,"La bille est tombée sur la même couleur que votre numéro")
+                        irc.private(id,"Vous avez maintenant {0} points".format(solde))
                     else:
-                        print("Pas de chance !")
-                        print("Il vous reste {0}€".format(solde))
+                        gain = - mise
+                        irc.private(id,"Pas de chance !")
+                        irc.private(id,"Il vous reste {0}€".format(solde))
+
+                    data[id].setscore(solde)
+                    enregistrer_scores(data)
+                    log(id, "a gagné "+ str(gain) + " à la roulette")
 
                     if solde <= 0:
-                        print("\nVous n'avez plus d'argent")
+                        irc.private(id,"Vous n'avez plus d'argent")
                         continuer = False
                     elif solde > 0:
-                        question = input("\nVoulez vous continuer ? (o/n) :")
+                        irc.private(id,"Voulez vous continuer ? (o/n) :")
+                        time.sleep(3)
+                        question, ID = irc.recevoir()
+                        while ID != id:
+                            question, ID = irc.recevoir()
                         if question.lower() == "oui" or question.lower() == "o":
                             continuer = True
                         elif question.lower() == "non" or question.lower() == "n":
