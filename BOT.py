@@ -157,7 +157,7 @@ while True:
                         irc.private(id,"La bille est tombée sur la même couleur que votre numéro")
                         irc.private(id,"Vous avez maintenant {0} points".format(solde))
                     else:
-                        gain = - mise
+                        gain = - float(mise)
                         irc.private(id,"Pas de chance !")
                         irc.private(id,"Il vous reste {0}€".format(solde))
 
