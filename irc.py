@@ -45,11 +45,16 @@ class IRC:
         return text
 
     def recevoir(self):
-        text = self.irc.recv(2048).decode('UTF-8')
+        text = ""
+        while len(text) == 0:
+            text = self.irc.recv(2048).decode('UTF-8')
+            time.sleep(1)
+        ID = text.split('!')[0]
+        ID = ID.lstrip(':')
         text = text.split(' :')
         text = text[-1]
         text = text.strip('\r\n')
-        return text
+        return text, ID
 
     def close(self):
         self.irc.close()
