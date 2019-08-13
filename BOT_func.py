@@ -1,8 +1,6 @@
 import os
 import pickle
 import datetime as dt
-from random import randrange
-from math import ceil
 
 def recup_scores():
     """Cette fonction récupère les scores enregistrés si le fichier existe.
