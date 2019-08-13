@@ -79,7 +79,7 @@ while True:
             elif message.find('!log') != -1:
                 if id == admin:
                     #message de la forme !log/message ici/
-                    mess = message.slit('/')[1]
+                    mess = message.split('/')[1]
                     log(id, mess)
                 else:
                     log(id, 'COMMANDE INTERDITE ' + message)
