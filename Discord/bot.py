@@ -16,9 +16,9 @@ messages = joined = invites = chan = 0
 async def update_stats():
     await client.wait_until_ready()
     global messages, joined, invites,chan
-    date = datetime.now().strftime("%d/%m/%Y %H") + 'h'
     while not client.is_closed():
         try:
+            date = datetime.now().strftime("%d/%m/%Y %H") + 'h'
             with open("stats.txt",'a') as f:
                 f.write("{} Nouveaux membres: {} Messages: {} Vocaux: {} Invitations: {}\n".format(date,joined,messages,chan,invites))
             messages = joined = invites = chan = 0
