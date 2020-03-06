@@ -36,6 +36,7 @@ async def on_ready():
 async def on_message(message):
     global messages
     messages+=1
+    await client.process_commands(message)
 
 @client.event
 async def on_invite_create(invite):
